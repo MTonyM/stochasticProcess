@@ -5,9 +5,9 @@ This is a repo contains some simulations and Rmd files. Based on R language. The
 
 ## Simulation Part
 
-- [x] [M/M/1 queue simulation.](mm1que.nb.html)
+- [x] [M/M/1 queue simulation.](mm1que/mm1que.nb.html)
 
-- [x] [M/M/s-like queue simulation](LoadBalance.nb.html)- Cloud Balance simulation.
+- [x] [M/M/s-like queue simulation](loadbalance/LoadBalance.nb.html)- Cloud Balance simulation.
 
 - [] WeChat red envelope simulation
 
