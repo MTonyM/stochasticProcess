@@ -1,17 +1,16 @@
 # stochasticProcess
-A repo contains some simulations and Rmd files. Based on R language
+
+This is a repo contains some simulations and Rmd files. Based on R language. The codes are my homework solution to Projects in SI241, in ShanghaiTech. Contains copyright. Please don't use my code if you are enrolling the course SI241.
 
 
 ## Simulation Part
 
-[X] [M/M/1 queue simulation.](mm1que.nb.html)
+- [x] [M/M/1 queue simulation.](mm1que.nb.html)
 
-[X] M/M/s-like queue simulation// Cloud Balance simulation.
+- [x] [M/M/s-like queue simulation](LoadBalance.nb.html)- Cloud Balance simulation.
 
-[] WeChat red envelope simulation
+- [] WeChat red envelope simulation
 
-[] Monty Hall simulation
+- [] Monty Hall simulation
 
-[] MCMC-fix k-color problem
-
-[]
+- [] MCMC-fix k-color problem
