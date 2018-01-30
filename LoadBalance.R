@@ -1,0 +1,77 @@
+choose_server_policy <- function(arrival_time, choose_policies, batch_size, num_server, probe_ratio, server_loads, service_time){
+  if (choose_policies == 1){
+    choose_server <- ceiling(runif(n = batch_size, 0, 1) * num_server)
+  }else if (choose_policies == 2){
+    choose_server <- c(1:batch_size) * 0
+    temp_load <- c(1:length(server_loads)-1) * 0
+    for (server in c(1:length(server_loads))){
+      temp_load[server] <- length(server_loads[[server]][server_loads[[server]] >= arrival_time])
+    }
+    for ( i in c(1:batch_size) ){
+      macro_choose_server <- ceiling(runif(n = probe_ratio, 0, 1) * num_server)
+      choose_server[i] <- macro_choose_server[which.min(temp_load[macro_choose_server])]
+      temp_load[choose_server[i]] = temp_load[choose_server[i]] + 1
+      # update temp load
+    }
+  }else{
+    macro_choose_server <- ceiling(runif(n = batch_size * probe_ratio, 0, 1) * num_server)
+    temp_load <- c(1:length(macro_choose_server)-1) * 0
+    for (server in c(1:length(macro_choose_server))){
+      server_index <- macro_choose_server[server]
+      temp_load[server] <- length(server_loads[[server_index]][server_loads[[server_index]] >= arrival_time])
+    }
+    choose_server <- macro_choose_server[order(temp_load, decreasing = FALSE)][1:batch_size]
+  }
+  return(choose_server)
+}
+
+self_add <- function(vec){
+  new <- c(1:length(vec))
+  for (i in c(1:length(vec))){
+    new[i] <- sum(vec[1:i])
+  }
+  return(new)
+}
+
+CloudLoadBalanceSim <- function (lambda = 0.7, choose_policies = 1, simulation_time = 20, probe_ratio = 1){
+  digi <- 5              # display num small
+  # lambda <- 0.7          # Choose (0.4, 0.7, 0.9)
+  num_server <- 5000      # n <- 5000
+  batch_size <- 50        # m <- 50
+  # probe_ratio <- 1       # 1 <= d <= 5
+  policies <- c("Random", "The-Power-of-d-choise", "Batch-Sampling")
+  # choose_policies <- 2
+  # simulation_time <- 20
+  
+  log <- paste("Choose Policy", "--", policies[choose_policies], "--", "lambda:", lambda, 
+               "simulation in:", simulation_time, "probe ratio:", probe_ratio)
+  
+  service_end_time <- rep.int(0, times = num_server)
+  service_start_time <- rep.int(0, times = num_server)
+  
+  jobs <- 0; t <- 0;arrival_time <- 0
+  server_loads <- list();server_loads[num_server+1] = 0
+  task_time_insys <- 0; job_time_insys <- 0
+  while (t < simulation_time){
+    
+    arrival_time <- arrival_time + round(x = rexp(n = 1, lambda * num_server / batch_size), digits = digi)
+    service_time <- round(x = rexp(n = batch_size, rate = 1), digits = digi)
+    choose_server <- choose_server_policy(arrival_time, choose_policies, batch_size, 
+                                          num_server, probe_ratio, server_loads, service_time)
+    for (client in c(1:batch_size)){
+      service_start_time[choose_server[client]] <- max(arrival_time, service_end_time[choose_server[client]])
+      service_end_time[choose_server[client]] <- service_start_time[choose_server[client]]  + service_time[client]
+      task_time_insys <- task_time_insys + service_end_time[choose_server[client]] - arrival_time
+      server_loads[[choose_server[client]]] <- c(server_loads[[choose_server[client]]],service_end_time[choose_server[client]])
+    }
+    job_time_insys <- job_time_insys + max(service_end_time[choose_server]) - arrival_time
+    jobs <- jobs + 1
+    t <- arrival_time
+  }
+  mean_time_job <- job_time_insys / jobs
+  mean_time_task <- task_time_insys / jobs / batch_size
+  log <- paste(log, "\ntotal jobs:", jobs, "E(time in system jobs)=", format(mean_time_job, nsmall = digi), "E(time in system task)=", format(mean_time_task, nsmall = digi),'\n')
+  cat(log)  
+}
+CloudLoadBalanceSim()
+CloudLoadBalanceSim(0.4,2,50,1)
